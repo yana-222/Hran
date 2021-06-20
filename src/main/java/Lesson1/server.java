@@ -18,6 +18,7 @@ import java.util.concurrent.Executors;
     // 7. Search 8. Navigation 9. Fix total space 10. Logging 11. Total + Free space 12. Sort (name, date, type)
     // 13. Bucket 14. Logging
 public class server {
+    // корректный вывод статуса в консоли
     public server(){
         ExecutorService service = Executors.newFixedThreadPool(4);
         try (ServerSocket server = new ServerSocket(5678)){
