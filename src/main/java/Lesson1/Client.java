@@ -24,11 +24,23 @@ public class Client extends JFrame {
         JTextField textField = new JTextField();
 
         btnSend.addActionListener(a->{
-            String message = textField.getText();
-            if (message.equals("exit")){
+            String[] cmd = textField.getText().split(" ");
+            if (cmd[0].equals("exit")){
                 System.out.println("Client disconnected");
+                try {
+                    socket.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
-            sendFile(message);
+
+            if ("upload".equals(cmd[0])){
+                sendFile(cmd[1]);
+            }
+            if ("download".equals(cmd[0])){
+                downloadFile(cmd[1]);
+            }
+
         });
 
         panel.add(textField);
@@ -46,18 +58,47 @@ public class Client extends JFrame {
         setVisible(true);
     }
 
+    private void downloadFile(String filename) {
+           try {
+               out.writeUTF("download " + filename);
+               String[] cmd = in.readUTF().split(" ");
+
+                File file = new File("client" + File.separator + cmd[1]);
+                if(!file.exists()){
+                    file.createNewFile();
+                }
+               FileOutputStream fos = new FileOutputStream(file);
+               long size = in.readLong();
+               byte[] buffer = new byte[8 * 1024];
+               for (int i = 0; i < (size + (buffer.length - 1)) / (buffer.length); i++) {
+                   int read = in.read(buffer);
+                   fos.write(buffer, 0, read);
+               }
+               fos.close();
+               out.writeUTF("Downloading_OK");
+               System.out.println("File " + cmd[1] + " downloaded");
+
+            } catch (Exception e){
+               try {
+                   out.writeUTF("Error_downloading");
+               } catch (IOException ioException) {
+                   ioException.printStackTrace();
+               }
+
+           }
+    }
+
     private void sendFile(String filename) {
         try{
             File file = new File("Client" + File.separator + filename);
             if(!file.exists()){
                 throw new FileNotFoundException();
             }
+            out.writeUTF("upload " + filename);
 
             long fileLength = file.length();
             FileInputStream fis = new FileInputStream(file);
 
-            out.writeUTF("upload");
-            out.writeUTF(filename);
             out.writeLong(fileLength);
             int read =0;
             byte[] buffer = new byte [8*1024];
@@ -68,7 +109,6 @@ public class Client extends JFrame {
 
             String status = in.readUTF();
             System.out.println("sending status: " + status);
-
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -88,6 +128,5 @@ public class Client extends JFrame {
     public static void main(String[] args) throws IOException {
         new Client();
     }
-
 
 }
