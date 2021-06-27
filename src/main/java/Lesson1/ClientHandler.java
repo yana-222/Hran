@@ -30,6 +30,12 @@ public class ClientHandler implements Runnable{
                         byte[] buffer = new byte[8 * 1024];
                         // Объяснить почему так реализован цикл: нет ответа
                         for (int i = 0; i < (size + (buffer.length - 1))/ (buffer.length) ; i++) {
+                            System.out.println(i);
+                            System.out.println(size);
+                            System.out.println(buffer.length);
+                            System.out.println((size + (buffer.length - 1)));
+                            System.out.println((size + (buffer.length - 1))/ (buffer.length) );
+                            System.out.println(i < (size + (buffer.length - 1))/ (buffer.length));
                             int read = in.read(buffer);
                             fos.write(buffer, 0, read);
                         }
